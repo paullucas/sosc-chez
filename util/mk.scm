@@ -1,3 +1,4 @@
+(import (rhs r6rs rhs))
 (load "/home/rohan/sw/rhs/util/util.scm")
 
 (mk-r6rs '(sosc ikarus sosc)
