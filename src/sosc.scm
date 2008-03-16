@@ -53,14 +53,6 @@
       (f v 0 n be)
       v)))
 
-;; float -> int
-(define floor-exact
-  (compose inexact->exact floor))
-
-;; float -> int
-(define round-exact
-  (compose inexact->exact round))
-
 (define decode-u8
   (lambda (v) 
     (bytevector-u8-ref v 0)))
@@ -241,34 +233,28 @@
 ;; NTP is measured from the former, UTC from the latter. There are 17
 ;; leap years in this period.
 
-(define 2^32
-  (expt 2 32))
-
-(define 2^32.
-  (exact->inexact 2^32))
-
 (define seconds-from-1900-to-1970
   (+ (* 70 365 24 60 60) (* 17 24 60 60)))
 
 (define ntpr->ntp
   (lambda (i)
-    (round-exact (* i 2^32))))
+    (round (* i (expt 2 32)))))
 
 (define ntp-to-seconds
   (lambda (i)
-    (/ i 2^32)))
+    (/ i (expt 2 32))))
 
 (define ntp-to-seconds. 
   (lambda (i)
-    (/ i 2^32.)))
+    (/ i (expt 2 32))))
 
 (define nanoseconds-to-ntp
   (lambda (i)
-    (round-exact (* i (/ 2^32 (expt 10 9))))))
+    (round (* i (/ (expt 2 32) (expt 10 9))))))
 
 (define ntp-to-nanoseconds
   (lambda (i)
-    (* i (/ (expt 10 9) 2^32))))
+    (* i (/ (expt 10 9) (expt 2 32)))))
 
 ;; Convert between time intervals in seconds and NTP intervals.
 
@@ -314,8 +300,8 @@
 (define read-ostr
   (lambda ()
     (let* ((s (read-cstr))
-	   (n (modulo (cstring-length s) 4))
-	   (p (- 4 (modulo n 4))))
+	   (n (mod (cstring-length s) 4))
+	   (p (- 4 (mod n 4))))
       (if (not (= n 0))
 	  (read-bstr p)
 	  #f)
@@ -327,7 +313,7 @@
   (lambda ()
     (let* ((n (read-i32))
 	   (b (read-bstr n))
-	   (p (- 4 (modulo n 4))))
+	   (p (- 4 (mod n 4))))
       (if (not (= n 0))
 	  (read-bstr p)
 	  #f)
@@ -413,8 +399,8 @@
   (lambda (l)
     (for-each
      (lambda (b n)
-       (display (format "~a (~a)" (number->string b 16) (integer->char b)))
-       (if (= 3 (modulo n 4))
+       (display (list (number->string b 16) (integer->char b)))
+       (if (= 3 (mod n 4))
 	   (newline)
 	   (display #\space)))
      l
@@ -432,7 +418,7 @@
 ;; string -> [bytevector]
 (define encode-string
   (lambda (s)
-    (let ((n (modulo (cstring-length s) 4)))
+    (let ((n (mod (cstring-length s) 4)))
       (list (encode-cstr s)
 	    (if (= n 0)
 		(list)
@@ -442,7 +428,7 @@
 (define encode-bytes
   (lambda (b)
     (let* ((n (bytevector-length b))
-	   (n* (modulo n 4)))
+	   (n* (mod n 4)))
       (list (encode-i32 n)
 	    b
 	    (if (= n* 0)
@@ -452,7 +438,7 @@
 ;; any -> bytevector|[bytevector]
 (define encode-value
   (lambda (e)
-    (cond ((exact-integer? e) (encode-i32 e))
+    (cond ((integer? e) (encode-i32 e))
 	  ((real? e) (encode-f32 e))
 	  ((string? e) (encode-string e))
 	  ((bytevector? e) (encode-bytes e))
@@ -465,7 +451,7 @@
      (list->string
       (cons #\,
 	    (map (lambda (e)
-		   (cond ((exact-integer? e) #\i)
+		   (cond ((integer? e) #\i)
 			 ((real? e) #\f)
 			 ((string? e) #\s)
 			 ((bytevector? e) #\b)
@@ -514,15 +500,26 @@
 
 ;; socket -> osc -> ()
 (define send
-  (lambda (u m)
-    (udp:send u (encode-osc m))))
+  (lambda (fd m)
+    (let ((b (encode-osc m)))
+      (cond ((udp:socket? fd)
+	     (udp:send fd b))
+	    ((tcp:socket? fd)
+	     (tcp:send fd (encode-u32 (bytevector-length b)))
+	     (tcp:send fd b))))))
 
 ;; port -> maybe osc
 (define recv
-  (lambda (u)
-    (let ((b (udp:recv u)))
-      (if b (decode-osc b) #f))))
-
+  (lambda (fd)
+    (cond ((udp:socket? fd)
+	   (let ((b (udp:recv fd)))
+	     (and b (decode-osc b))))
+	  ((tcp:socket? fd)
+	   (let ((n (decode-u32 (tcp:read fd 4))))
+	     (display n)
+	     (newline)
+	     (decode-osc (tcp:read fd n)))))))
+	  
 ;; port -> string -> osc -> float -> mabye osc
 (define osc-request
   (lambda (fd r m t)
