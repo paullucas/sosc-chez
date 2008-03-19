@@ -1,9 +1,10 @@
-;; bytevector -> (() -> any) -> any
+;; bytevector -> (port -> any) -> any
 (define with-input-from-bytevector 
   (lambda (b f)
-    (parameterize
-     ((current-input-port (open-bytevector-input-port b)))
-     (f))))
+    (let* ((p (open-bytevector-input-port b))
+	   (r (f p)))
+      (close-port p)
+      r)))
 
 ;; bytevector -> int -> int -> bytevector
 (define bytevector-section
@@ -168,56 +169,55 @@
       (list b z))))
 
 (define read-pstr
-  (lambda ()
-    (let* ((p (current-input-port))
-	   (n (lookahead-u8 p))
-	   (v (read-bstr (+ n 1))))
+  (lambda (p)
+    (let* ((n (lookahead-u8 p))
+	   (v (read-bstr p (+ n 1))))
       (decode-pstr v))))
 
 (define read-cstr
-  (lambda ()
+  (lambda (p)
     (let loop ((l nil)
-	       (b (get-u8 (current-input-port))))
+	       (b (get-u8 p)))
       (if (= b 0)
-	  (list->string (map integer->char (reverse l)))
-	  (loop (cons b l) (get-u8 (current-input-port)))))))
+	  (list->string (map1 integer->char (reverse l)))
+	  (loop (cons b l) (get-u8 p))))))
 
 ;; int -> bytevector
 (define read-bstr
-  (lambda (n)
-    (get-bytevector-n (current-input-port) n)))
+  (lambda (p n)
+    (get-bytevector-n p n)))
 
 (define read-i16
-  (lambda () 
-    (decode-i16 (read-bstr 2))))
+  (lambda (p) 
+    (decode-i16 (read-bstr p 2))))
 
 (define read-u16
-  (lambda () 
-    (decode-u16 (read-bstr 2))))
+  (lambda (p) 
+    (decode-u16 (read-bstr p 2))))
 
 (define read-i32 
-  (lambda () 
-    (decode-i32 (read-bstr 4))))
+  (lambda (p) 
+    (decode-i32 (read-bstr p 4))))
 
 (define read-u32 
-  (lambda () 
-    (decode-u32 (read-bstr 4))))
+  (lambda (p) 
+    (decode-u32 (read-bstr p 4))))
 
 (define read-i64 
-  (lambda () 
-    (decode-i64 (read-bstr 8))))
+  (lambda (p) 
+    (decode-i64 (read-bstr p 8))))
 
 (define read-u64 
-  (lambda () 
-    (decode-u64 (read-bstr 8))))
+  (lambda (p) 
+    (decode-u64 (read-bstr p 8))))
 
 (define read-f32 
-  (lambda () 
-    (decode-f32 (read-bstr 4))))
+  (lambda (p) 
+    (decode-f32 (read-bstr p 4))))
 
 (define read-f64 
-  (lambda () 
-    (decode-f64 (read-bstr 8))))
+  (lambda (p) 
+    (decode-f64 (read-bstr p 8))))
 
 
 ;; ntp
@@ -298,24 +298,24 @@
 ;; OSC strings are C strings padded to a four byte boundary.
 
 (define read-ostr
-  (lambda ()
-    (let* ((s (read-cstr))
+  (lambda (p)
+    (let* ((s (read-cstr p))
 	   (n (mod (cstring-length s) 4))
-	   (p (- 4 (mod n 4))))
+	   (i (- 4 (mod n 4))))
       (if (not (= n 0))
-	  (read-bstr p)
+	  (read-bstr p i)
 	  #f)
       s)))
 
 ;; OSC byte strings are length prefixed.
 
 (define read-obyt
-  (lambda ()
-    (let* ((n (read-i32))
-	   (b (read-bstr n))
-	   (p (- 4 (mod n 4))))
+  (lambda (p)
+    (let* ((n (read-i32 p))
+	   (b (read-bstr p n))
+	   (i (- 4 (mod n 4))))
       (if (not (= n 0))
-	  (read-bstr p)
+	  (read-bstr p i)
 	  #f)
       b)))
 
@@ -323,38 +323,38 @@
 ;; `type', encoded at the OSC byte stream `p'.
 
 (define read-value
-  (lambda (t)
+  (lambda (p t)
     (cond
-     ((eq? t oI32) (read-i32))
-     ((eq? t oI64) (read-i64))
-     ((eq? t oU64) (read-u64))
-     ((eq? t oF32) (read-f32))
-     ((eq? t oF64) (read-f64))
-     ((eq? t oStr) (read-ostr))
-     ((eq? t oByt) (read-obyt))
-     (else (error 'read-value "bad type" t)))))
+     ((equal? t oI32) (read-i32 p))
+     ((equal? t oI64) (read-i64 p))
+     ((equal? t oU64) (read-u64 p))
+     ((equal? t oF32) (read-f32 p))
+     ((equal? t oF64) (read-f64 p))
+     ((equal? t oStr) (read-ostr p))
+     ((equal? t oByt) (read-obyt p))
+     (else (error "read-value" "bad type" t)))))
 
 ;; Evaluate to the list of objects encoded at the OSC byte stream
 ;; `p', conforming to the types given in the OSC character type
 ;; list `types'.
 
 (define read-arguments
-  (lambda (types)
+  (lambda (p types)
     (if (null? types)
 	'()
-	(cons (read-value (car types))
-	      (read-arguments (cdr types))))))
+	(cons (read-value p (car types))
+	      (read-arguments p (cdr types))))))
 
 ;; Evaluate to the scheme representation of the OSC message at the OSC
 ;; byte stream `p'. The first object is the 'address' of the
 ;; message, any subsequent objects are arguments for that address.
 
 (define read-message
-  (lambda ()
-    (let* ((address (read-ostr))
-	   (types (read-ostr)))
+  (lambda (p)
+    (let* ((address (read-ostr p))
+	   (types (read-ostr p)))
       (cons address
-	    (read-arguments (cdr (string->list types)))))))
+	    (read-arguments p (cdr (string->list types)))))))
 
 ;; Evaluate to a scheme representation of the OSC bundle encoded at
 ;; the OSC stream `p'. The bundle ends at the end of the byte
@@ -363,20 +363,20 @@
 ;; OSC bundles.
 
 (define read-bundle
-  (lambda ()
-    (let ((bundletag (read-ostr))
-	  (timetag (ntp->utc. (read-u64)))
+  (lambda (p)
+    (let ((bundletag (read-ostr p))
+	  (timetag (ntp->utc. (read-u64 p)))
 	  (parts (list)))
       (if (not (equal? bundletag "#bundle"))
-	  (error 'read-bundle "illegal bundle tag" bundletag)
+	  (error "read-bundle" "illegal bundle tag" bundletag)
 	  (cons timetag
 		(let loop ((parts (list)))
-		  (if (eof-object? (lookahead-u8 (current-input-port)))
+		  (if (eof-object? (lookahead-u8 p))
 		      (reverse parts)
 		      (begin
 			;; We have no use for the message size...
-			(read-i32)
-			(loop (cons (read-packet) parts))))))))))
+			(read-i32 p)
+			(loop (cons (read-packet p) parts))))))))))
 
 ;; byte
 (define hash-u8
@@ -384,10 +384,10 @@
 
 ;; () -> osc
 (define read-packet
-  (lambda () 
-    (if (eq? (lookahead-u8 (current-input-port)) hash-u8)
-	(read-bundle)
-	(read-message))))
+  (lambda (p) 
+    (if (equal? (lookahead-u8 p) hash-u8)
+	(read-bundle p)
+	(read-message p))))
 
 ;; bytevector -> osc
 (define decode-osc
@@ -397,7 +397,7 @@
 ;; [byte] -> ()
 (define osc-display
   (lambda (l)
-    (for-each
+    (zip-with
      (lambda (b n)
        (display (list (number->string b 16) (integer->char b)))
        (if (= 3 (mod n 4))
@@ -442,7 +442,7 @@
 	  ((real? e) (encode-f32 e))
 	  ((string? e) (encode-string e))
 	  ((bytevector? e) (encode-bytes e))
-	  (else (error 'encode-value "illegal value" e)))))
+	  (else (error "encode-value" "illegal value" e)))))
 
 ;; [any] -> [bytevector]
 (define encode-types
@@ -450,12 +450,12 @@
     (encode-string
      (list->string
       (cons #\,
-	    (map (lambda (e)
-		   (cond ((integer? e) #\i)
-			 ((real? e) #\f)
-			 ((string? e) #\s)
-			 ((bytevector? e) #\b)
-			 (else (error 'encode-types "type?" e))))
+	    (map1 (lambda (e)
+		    (cond ((integer? e) #\i)
+			  ((real? e) #\f)
+			  ((string? e) #\s)
+			  ((bytevector? e) #\b)
+			  (else (error "encode-types" "type?" e))))
 		 l))))))
 
 ;; osc -> [bytevector]
@@ -463,18 +463,18 @@
   (lambda (m)
     (list (encode-string (car m))
 	  (encode-types (cdr m))
-	  (map encode-value (cdr m)))))
+	  (map1 encode-value (cdr m)))))
 
 ;; osc -> [bytevector]
 (define encode-bundle-ntp
   (lambda (b)
     (list (encode-string "#bundle")
 	  (encode-u64 (ntpr->ntp (car b)))
-	  (map (lambda (e)
-		 (if (message? e)
-		     (encode-bytes (encode-osc e))
-		     (error 'encode-bundle "illegal value" e)))
-	       (cdr b)))))
+	  (map1 (lambda (e)
+		  (if (message? e)
+		      (encode-bytes (encode-osc e))
+		      (error "encode-bundle" "illegal value" e)))
+		(cdr b)))))
 
 ;; osc -> [bytevector]
 (define encode-bundle
@@ -492,11 +492,11 @@
 ;; any|[any] -> number|string|bytevector|[number|string|bytevector]
 (define purify
   (lambda (e)
-    (cond ((or (number? e) (string? e) (bytevector? e)) e)
-	  ((list? e) (map purify e))
+    (cond ((or3 (number? e) (string? e) (bytevector? e)) e)
+	  ((list? e) (map1 purify e))
 	  ((symbol? e) (symbol->string e))
 	  ((boolean? e) (if e 1 0))
-	  (else (error 'purify "illegal input" e)))))
+	  (else (error "purify" "illegal input" e)))))
 
 ;; socket -> osc -> ()
 (define send
@@ -513,7 +513,7 @@
   (lambda (fd)
     (cond ((udp:socket? fd)
 	   (let ((b (udp:recv fd)))
-	     (and b (decode-osc b))))
+	     (and2 b (decode-osc b))))
 	  ((tcp:socket? fd)
 	   (let ((n (decode-u32 (tcp:read fd 4))))
 	     (display n)
@@ -525,7 +525,7 @@
   (lambda (fd r m t)
     (send fd m)
     (let ((p (recv fd t)))
-      (if (and p (string=? (head p) r)) 
+      (if (and2 p (equal? (head p) r)) 
 	  p 
 	  #f))))
 
@@ -543,14 +543,14 @@
   (lambda (c l)
     (if (string? c)
 	(cons c l)
-	(error "message: illegal address"))))
+	(error "message" "illegal address"))))
 
 ;; float -> [any] -> osc
 (define bundle
   (lambda (t l)
     (if (number? t)
 	(cons t l)
-	(error "bundle: illegal timestamp" t))))
+	(error "bundle" "illegal timestamp" t))))
 
 ;; osc -> bool
 (define message?
@@ -565,23 +565,23 @@
 ;; osc -> bool
 (define verify-message
   (lambda (m)
-    (and (string? (car m))
-	 (all (lambda (e) (or (integer? e)
-			      (real? e)
-			      (string? e)))
-	      (cdr m)))))
+    (and2 (string? (car m))
+	  (all (lambda (e) (or3 (integer? e)
+				(real? e)
+				(string? e)))
+	       (cdr m)))))
 
 ;; osc -> bool
 (define verify-bundle
   (lambda (b)
-    (and (integer? (car b))
-	 (all (lambda (e) (or (verify-message e)
-			      (and (verify-bundle e)
-				   (>= (car e) (car b)))))
-	      (cdr b)))))
+    (and2 (integer? (car b))
+	  (all (lambda (e) (or2 (verify-message e)
+				(and2 (verify-bundle e)
+				      (>= (car e) (car b)))))
+	       (cdr b)))))
 
 ;; osc -> bool
 (define verify-packet
   (lambda (p)
-    (or (verify-message p)
-	(verify-bundle p))))
+    (or2 (verify-message p)
+	 (verify-bundle p))))
