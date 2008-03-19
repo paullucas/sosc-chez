@@ -520,15 +520,6 @@
 	     (newline)
 	     (decode-osc (tcp:read fd n)))))))
 	  
-;; port -> string -> osc -> float -> mabye osc
-(define osc-request
-  (lambda (fd r m t)
-    (send fd m)
-    (let ((p (recv fd t)))
-      (if (and2 p (equal? (head p) r)) 
-	  p 
-	  #f))))
-
 ;; char
 (define oI32 #\i)
 (define oI64 #\h)
