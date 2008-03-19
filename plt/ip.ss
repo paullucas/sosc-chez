@@ -3,13 +3,10 @@
 
 (require scheme/udp)
 (require scheme/tcp)
-(require (only-in rnrs/io/ports-6 
-		  get-bytevector-n 
-		  ;get-u8 
-		  ;lookahead-u8 
-		  ;open-bytevector-input-port
-		  put-bytevector))
-(require "r6rs.ss")
+(require (except-in rnrs/io/ports-6
+		    current-output-port
+		    current-input-port
+		    current-error-port))
 
 (define-struct udp* (s h p))
 
