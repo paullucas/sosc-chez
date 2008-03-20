@@ -88,11 +88,11 @@
 
 (define decode-f32
   (lambda (v) 
-    (bytevector-ieee-single-ref v 0)))
+    (bytevector-ieee-single-ref v 0 be)))
 
 (define decode-f64
   (lambda (v) 
-    (bytevector-ieee-double-ref v 0)))
+    (bytevector-ieee-double-ref v 0 be)))
 
 (define decode-str
   (lambda (b)
@@ -146,11 +146,21 @@
 
 (define encode-f32
   (lambda (n)
-    (bytevector-make-and-set bytevector-ieee-single-set! 4 n)))
+    (bytevector-make-and-set 
+     bytevector-ieee-single-set! 
+     4 
+     (if (exact? n)
+	 (inexact n)
+	 n))))
 
 (define encode-f64
   (lambda (n)
-    (bytevector-make-and-set bytevector-ieee-double-set! 8 n)))
+    (bytevector-make-and-set 
+     bytevector-ieee-double-set! 
+     8 
+     (if (exact? n)
+	 (inexact n)
+	 n))))
 
 (define encode-str
   (lambda (s)
@@ -438,8 +448,9 @@
 ;; any -> bytevector|[bytevector]
 (define encode-value
   (lambda (e)
-    (cond ((integer? e) (encode-i32 e))
-	  ((real? e) (encode-f32 e))
+    (cond ((number? e) (if (exact? e)
+			   (encode-i32 e)
+			   (encode-f32 e)))
 	  ((string? e) (encode-string e))
 	  ((bytevector? e) (encode-bytes e))
 	  (else (error "encode-value" "illegal value" e)))))
