@@ -448,7 +448,8 @@
 ;; any -> bytevector|[bytevector]
 (define encode-value
   (lambda (e)
-    (cond ((number? e) (if (exact? e)
+    (cond ((number? e) (if (and (integer? e)
+				(exact? e))
 			   (encode-i32 e)
 			   (encode-f32 e)))
 	  ((string? e) (encode-string e))
