@@ -1,5 +1,5 @@
 ;; bytevector -> (port -> any) -> any
-(define with-input-from-bytevector 
+(define with-input-from-bytevector
   (lambda (b f)
     (let* ((p (open-bytevector-input-port b))
 	   (r (f p)))
@@ -55,27 +55,27 @@
       v)))
 
 (define decode-u8
-  (lambda (v) 
+  (lambda (v)
     (bytevector-u8-ref v 0)))
 
 (define decode-u16
-  (lambda (v) 
+  (lambda (v)
     (bytevector-u16-ref v 0 be)))
 
 (define decode-u32
-  (lambda (v) 
+  (lambda (v)
     (bytevector-u32-ref v 0 be)))
 
 (define decode-u64
-  (lambda (v) 
+  (lambda (v)
     (bytevector-u64-ref v 0 be)))
 
 (define decode-i8
-  (lambda (v) 
+  (lambda (v)
     (bytevector-s8-ref v 0)))
 
 (define decode-i16
-  (lambda (v) 
+  (lambda (v)
     (bytevector-s16-ref v 0 be)))
 
 (define decode-i32
@@ -87,11 +87,11 @@
     (bytevector-s64-ref v 0 be)))
 
 (define decode-f32
-  (lambda (v) 
+  (lambda (v)
     (bytevector-ieee-single-ref v 0 be)))
 
 (define decode-f64
-  (lambda (v) 
+  (lambda (v)
     (bytevector-ieee-double-ref v 0 be)))
 
 (define decode-str
@@ -113,54 +113,74 @@
 (define be (endianness big))
 
 (define encode-u8
-  (lambda (n) 
-    (bytevector-make-and-set1 bytevector-u8-set! 1 n)))
+  (lambda (n)
+    (bytevector-make-and-set1
+     bytevector-u8-set!
+     1
+     (exact n))))
 
 (define encode-u16
   (lambda (n)
-    (bytevector-make-and-set bytevector-u16-set! 2 n)))
+    (bytevector-make-and-set
+     bytevector-u16-set!
+     2
+     (exact n))))
 
 (define encode-u32
   (lambda (n)
-    (bytevector-make-and-set bytevector-u32-set! 4 n)))
+    (bytevector-make-and-set
+     bytevector-u32-set!
+     4
+     (exact n))))
 
 (define encode-u64
   (lambda (n)
-    (bytevector-make-and-set bytevector-u64-set! 8 n)))
+    (bytevector-make-and-set
+     bytevector-u64-set!
+     8
+     (exact n))))
 
 (define encode-i8
-  (lambda (n) 
-    (bytevector-make-and-set1 bytevector-s8-set! 1 n)))
+  (lambda (n)
+    (bytevector-make-and-set1
+     bytevector-s8-set!
+     1
+     (exact n))))
 
 (define encode-i16
   (lambda (n)
-    (bytevector-make-and-set bytevector-s16-set! 2 n)))
+    (bytevector-make-and-set
+     bytevector-s16-set!
+     2
+     (exact n))))
 
 (define encode-i32
-  (lambda (n) 
-    (bytevector-make-and-set bytevector-s32-set! 4 n)))
+  (lambda (n)
+    (bytevector-make-and-set
+     bytevector-s32-set!
+     4
+     (exact n))))
 
 (define encode-i64
   (lambda (n)
-    (bytevector-make-and-set bytevector-s64-set! 8 n)))
+    (bytevector-make-and-set
+     bytevector-s64-set!
+     8
+     (exact n))))
 
 (define encode-f32
   (lambda (n)
-    (bytevector-make-and-set 
-     bytevector-ieee-single-set! 
-     4 
-     (if (exact? n)
-	 (inexact n)
-	 n))))
+    (bytevector-make-and-set
+     bytevector-ieee-single-set!
+     4
+     (inexact n))))
 
 (define encode-f64
   (lambda (n)
-    (bytevector-make-and-set 
-     bytevector-ieee-double-set! 
-     8 
-     (if (exact? n)
-	 (inexact n)
-	 n))))
+    (bytevector-make-and-set
+     bytevector-ieee-double-set!
+     8
+     (inexact n))))
 
 (define encode-str
   (lambda (s)
@@ -198,35 +218,35 @@
     (get-bytevector-n p n)))
 
 (define read-i16
-  (lambda (p) 
+  (lambda (p)
     (decode-i16 (read-bstr p 2))))
 
 (define read-u16
-  (lambda (p) 
+  (lambda (p)
     (decode-u16 (read-bstr p 2))))
 
-(define read-i32 
-  (lambda (p) 
+(define read-i32
+  (lambda (p)
     (decode-i32 (read-bstr p 4))))
 
-(define read-u32 
-  (lambda (p) 
+(define read-u32
+  (lambda (p)
     (decode-u32 (read-bstr p 4))))
 
-(define read-i64 
-  (lambda (p) 
+(define read-i64
+  (lambda (p)
     (decode-i64 (read-bstr p 8))))
 
-(define read-u64 
-  (lambda (p) 
+(define read-u64
+  (lambda (p)
     (decode-u64 (read-bstr p 8))))
 
-(define read-f32 
-  (lambda (p) 
+(define read-f32
+  (lambda (p)
     (decode-f32 (read-bstr p 4))))
 
-(define read-f64 
-  (lambda (p) 
+(define read-f64
+  (lambda (p)
     (decode-f64 (read-bstr p 8))))
 
 
@@ -254,7 +274,7 @@
   (lambda (i)
     (/ i (expt 2 32))))
 
-(define ntp-to-seconds. 
+(define ntp-to-seconds.
   (lambda (i)
     (/ i (expt 2 32))))
 
@@ -276,7 +296,7 @@
   (lambda (ntp-interval)
     (ntp-to-seconds ntp-interval)))
 
-(define ntp-interval->time-interval. 
+(define ntp-interval->time-interval.
   (lambda (ntp-interval)
     (ntp-to-seconds. ntp-interval)))
 
@@ -301,7 +321,7 @@
   (lambda (ntp)
     (- (ntp-to-seconds ntp) seconds-from-1900-to-1970)))
 
-(define ntp->utc. 
+(define ntp->utc.
   (lambda (ntp)
     (- (ntp-to-seconds. ntp) seconds-from-1900-to-1970)))
 
@@ -394,7 +414,7 @@
 
 ;; () -> osc
 (define read-packet
-  (lambda (p) 
+  (lambda (p)
     (if (equal? (lookahead-u8 p) hash-u8)
 	(read-bundle p)
 	(read-message p))))
@@ -448,8 +468,7 @@
 ;; any -> bytevector|[bytevector]
 (define encode-value
   (lambda (e)
-    (cond ((number? e) (if (and (integer? e)
-				(exact? e))
+    (cond ((number? e) (if (integer? e)
 			   (encode-i32 e)
 			   (encode-f32 e)))
 	  ((string? e) (encode-string e))
@@ -463,8 +482,9 @@
      (list->string
       (cons #\,
 	    (map1 (lambda (e)
-		    (cond ((integer? e) #\i)
-			  ((real? e) #\f)
+		    (cond ((number? e) (if (integer? e)
+					   #\i
+					   #\f))
 			  ((string? e) #\s)
 			  ((bytevector? e) #\b)
 			  (else (error "encode-types" "type?" e))))
@@ -547,9 +567,8 @@
 (define verify-message
   (lambda (m)
     (and2 (string? (car m))
-	  (all (lambda (e) (or3 (integer? e)
-				(real? e)
-				(string? e)))
+	  (all (lambda (e) (or (number? e)
+			       (string? e)))
 	       (cdr m)))))
 
 ;; osc -> bool
