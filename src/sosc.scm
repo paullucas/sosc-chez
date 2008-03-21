@@ -249,81 +249,24 @@
   (lambda (p)
     (decode-f64 (read-bstr p 8))))
 
-
-;; ntp
-
-;; NTP is the Network Time Protocol. NTP time is represented by a 64
-;; bit fixed point number. The first 32 bits specify the number of
-;; seconds since midnight on January 1, 1900, and the last 32 bits
-;; specify fractional parts of a second to a precision of about 200
-;; picoseconds. This is the representation used by Internet NTP
-;; timestamps.
-
-;; The number of seconds from the start of 1900 to the start of 1970.
-;; NTP is measured from the former, UTC from the latter. There are 17
-;; leap years in this period.
-
+;; int
 (define seconds-from-1900-to-1970
   (+ (* 70 365 24 60 60) (* 17 24 60 60)))
 
+;; double -> int
 (define ntpr->ntp
-  (lambda (i)
-    (round (* i (expt 2 32)))))
+  (lambda (n)
+    (exact (round (* n (expt 2 32))))))
 
-(define ntp-to-seconds
-  (lambda (i)
-    (/ i (expt 2 32))))
-
-(define ntp-to-seconds.
-  (lambda (i)
-    (/ i (expt 2 32))))
-
-(define nanoseconds-to-ntp
-  (lambda (i)
-    (round (* i (/ (expt 2 32) (expt 10 9))))))
-
-(define ntp-to-nanoseconds
-  (lambda (i)
-    (* i (/ (expt 10 9) (expt 2 32)))))
-
-;; Convert between time intervals in seconds and NTP intervals.
-
-(define time-interval->ntp-interval
-  (lambda (interval)
-    (ntpr->ntp interval)))
-
-(define ntp-interval->time-interval
-  (lambda (ntp-interval)
-    (ntp-to-seconds ntp-interval)))
-
-(define ntp-interval->time-interval.
-  (lambda (ntp-interval)
-    (ntp-to-seconds. ntp-interval)))
-
-;; Evaluate to an <real> representing the NTP time of the UTC time of
-;; the <real> number `n'.
-
+;; double -> double
 (define utc->ntpr
   (lambda (n)
     (+ n seconds-from-1900-to-1970)))
 
-;; Evaluate to an <integer> representing the NTP time of the UTC time
-;; of the <real> number `n'.
-
-(define utc->ntp
-  (lambda (n)
-    (ntpr->ntp (+ n seconds-from-1900-to-1970))))
-
-;; Evaluate to a <real> number representing the UTC time of the
-;; <integer> NTP time `ntp'.
-
+;; int -> doubl
 (define ntp->utc
-  (lambda (ntp)
-    (- (ntp-to-seconds ntp) seconds-from-1900-to-1970)))
-
-(define ntp->utc.
-  (lambda (ntp)
-    (- (ntp-to-seconds. ntp) seconds-from-1900-to-1970)))
+  (lambda (n)
+    (- (/ n (expt 2 32)) seconds-from-1900-to-1970)))
 
 ;; OSC strings are C strings padded to a four byte boundary.
 
@@ -395,7 +338,7 @@
 (define read-bundle
   (lambda (p)
     (let ((bundletag (read-ostr p))
-	  (timetag (ntp->utc. (read-u64 p)))
+	  (timetag (ntp->utc (read-u64 p)))
 	  (parts (list)))
       (if (not (equal? bundletag "#bundle"))
 	  (error "read-bundle" "illegal bundle tag" bundletag)
