@@ -3,7 +3,7 @@
 
 (mk-r6rs '(sosc r6rs sosc)
 	 '("/home/rohan/sw/sosc/src/sosc.scm")
-	 "/home/rohan/sw/sosc/r6rs/sosc.ss"
+	 "/home/rohan/sw/sosc/r6rs/sosc.sls"
 	 '((rnrs base)
 	   (rnrs bytevectors)
 	   (rnrs io ports)
@@ -12,10 +12,10 @@
 	 '()
 	 '())
 
-(mk-r6rs '(sosc ikarus transport)
+(mk-r6rs '(sosc r6rs transport)
 	 '("/home/rohan/sw/sosc/ikarus/ip.scm"
 	   "/home/rohan/sw/sosc/src/transport.scm")
-	 "/home/rohan/sw/sosc/ikarus/transport.scm"
+	 "/home/rohan/sw/sosc/r6rs/transport.ikarus.sls"
 	 '((rnrs base)
 	   (rnrs records syntactic)
 	   (rnrs bytevectors)

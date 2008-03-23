@@ -3,5 +3,4 @@ all:
 	ikarus mk.scm
 
 clean:
-	rm -f ../r6rs/sosc.ss
-	rm -f ../ikarus/transport.scm
+	rm -f ../r6rs/*.sls
