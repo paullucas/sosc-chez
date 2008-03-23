@@ -268,8 +268,7 @@
   (lambda (n)
     (- (/ n (expt 2 32)) seconds-from-1900-to-1970)))
 
-;; OSC strings are C strings padded to a four byte boundary.
-
+;; port -> string
 (define read-ostr
   (lambda (p)
     (let* ((s (read-cstr p))
@@ -280,8 +279,7 @@
 	  #f)
       s)))
 
-;; OSC byte strings are length prefixed.
-
+;; port -> bytevector
 (define read-obyt
   (lambda (p)
     (let* ((n (read-i32 p))
