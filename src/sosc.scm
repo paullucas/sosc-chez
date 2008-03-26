@@ -1,117 +1,73 @@
-;; bytevector -> (port -> any) -> any
-(define with-input-from-bytevector
-  (lambda (b f)
-    (let* ((p (open-bytevector-input-port b))
-	   (r (f p)))
-      (close-port p)
-      r)))
-
-;; bytevector -> int -> int -> bytevector
-(define bytevector-section
-  (lambda (v l r)
-    (let* ((n (- r l))
-	   (w (make-bytevector n 0)))
-      (bytevector-copy! v l w 0 n)
-      w)))
-
-;; bytevector -> byte -> int
-(define bytevector-find-index
-  (lambda (v x)
-    (letrec ((f (lambda (i)
-		  (if (= (bytevector-u8-ref v i) x)
-		      i
-		      (f (+ i 1))))))
-      (f 0))))
-
-;; Tree bytevector -> bytevector
-(define flatten-bytevectors
-  (lambda (t)
-    (let* ((l (flatten t))
-	   (n (map1 bytevector-length l))
-	   (m (sum n))
-	   (v (make-bytevector m)))
-      (let loop ((i 0)
-		 (l l)
-		 (n n))
-	(if (null? l)
-	    v
-	    (let ((l0 (car l))
-		  (n0 (car n)))
-	      (bytevector-copy! l0 0 v i n0)
-	      (loop (+ i n0) (cdr l) (cdr n))))))))
-
-;; (bytevector -> int -> x) -> int -> x
-(define bytevector-make-and-set1
-  (lambda (f k n)
-    (let ((v (make-bytevector k 0)))
-      (f v 0 n)
-      v)))
-
-;; (bytevector -> int -> x) -> int -> x
-(define bytevector-make-and-set
-  (lambda (f k n)
-    (let ((v (make-bytevector k 0)))
-      (f v 0 n be)
-      v)))
-
+;; bytevector -> int
 (define decode-u8
   (lambda (v)
     (bytevector-u8-ref v 0)))
 
+;; bytevector -> int
 (define decode-u16
   (lambda (v)
-    (bytevector-u16-ref v 0 be)))
+    (bytevector-u16-ref v 0 (endianness big))))
 
+;; bytevector -> int
 (define decode-u32
   (lambda (v)
-    (bytevector-u32-ref v 0 be)))
+    (bytevector-u32-ref v 0 (endianness big))))
 
+;; bytevector -> int
 (define decode-u64
   (lambda (v)
-    (bytevector-u64-ref v 0 be)))
+    (bytevector-u64-ref v 0 (endianness big))))
 
+;; bytevector -> int
 (define decode-i8
   (lambda (v)
     (bytevector-s8-ref v 0)))
 
+;; bytevector -> int
 (define decode-i16
   (lambda (v)
-    (bytevector-s16-ref v 0 be)))
+    (bytevector-s16-ref v 0 (endianness big))))
 
+;; bytevector -> int
 (define decode-i32
   (lambda (v)
-    (bytevector-s32-ref v 0 be)))
+    (bytevector-s32-ref v 0 (endianness big))))
 
+;; bytevector -> int
 (define decode-i64
   (lambda (v)
-    (bytevector-s64-ref v 0 be)))
+    (bytevector-s64-ref v 0 (endianness big))))
 
+;; bytevector -> double
 (define decode-f32
   (lambda (v)
-    (bytevector-ieee-single-ref v 0 be)))
+    (bytevector-ieee-single-ref v 0 (endianness big))))
 
+;; bytevector -> double
 (define decode-f64
   (lambda (v)
-    (bytevector-ieee-double-ref v 0 be)))
+    (bytevector-ieee-double-ref v 0 (endianness big))))
 
+;; bytevector -> string
 (define decode-str
   (lambda (b)
     (utf8->string b)))
 
+;; bytevector -> string
 (define decode-pstr
   (lambda (v)
     (let* ((n (decode-u8 v))
 	   (w (bytevector-section v 1 (+ n 1))))
       (decode-str w))))
 
+;; bytevector -> string
 (define decode-cstr
   (lambda (v)
     (let* ((n (bytevector-find-index v 0))
 	   (w (bytevector-section v 0 n)))
       (decode-str w))))
 
-(define be (endianness big))
-
+;; int -> bytevector
 (define encode-u8
   (lambda (n)
     (bytevector-make-and-set1
@@ -119,6 +75,7 @@
      1
      (exact n))))
 
+;; int -> bytevector
 (define encode-u16
   (lambda (n)
     (bytevector-make-and-set
@@ -126,6 +83,7 @@
      2
      (exact n))))
 
+;; int -> bytevector
 (define encode-u32
   (lambda (n)
     (bytevector-make-and-set
@@ -133,6 +91,7 @@
      4
      (exact n))))
 
+;; int -> bytevector
 (define encode-u64
   (lambda (n)
     (bytevector-make-and-set
@@ -140,6 +99,7 @@
      8
      (exact n))))
 
+;; int -> bytevector
 (define encode-i8
   (lambda (n)
     (bytevector-make-and-set1
@@ -147,6 +107,7 @@
      1
      (exact n))))
 
+;; int -> bytevector
 (define encode-i16
   (lambda (n)
     (bytevector-make-and-set
@@ -154,6 +115,7 @@
      2
      (exact n))))
 
+;; int -> bytevector
 (define encode-i32
   (lambda (n)
     (bytevector-make-and-set
@@ -161,6 +123,7 @@
      4
      (exact n))))
 
+;; int -> bytevector
 (define encode-i64
   (lambda (n)
     (bytevector-make-and-set
@@ -168,6 +131,7 @@
      8
      (exact n))))
 
+;; double -> bytevector
 (define encode-f32
   (lambda (n)
     (bytevector-make-and-set
@@ -175,6 +139,7 @@
      4
      (inexact n))))
 
+;; double -> bytevector
 (define encode-f64
   (lambda (n)
     (bytevector-make-and-set
@@ -182,28 +147,33 @@
      8
      (inexact n))))
 
+;; string -> bytevector
 (define encode-str
   (lambda (s)
     (string->utf8 s)))
 
+;; string -> bytevector
 (define encode-pstr
   (lambda (s)
     (let* ((b (encode-str s))
 	   (n (encode-u8 (bytevector-length b))))
       (list n b))))
 
+;; string -> bytevector
 (define encode-cstr
   (lambda (s)
     (let* ((b (encode-str s))
 	   (z (encode-u8 0)))
       (list b z))))
 
+;; port -> string
 (define read-pstr
   (lambda (p)
     (let* ((n (lookahead-u8 p))
 	   (v (read-bstr p (+ n 1))))
       (decode-pstr v))))
 
+;; port -> string
 (define read-cstr
   (lambda (p)
     (let loop ((l nil)
@@ -212,39 +182,47 @@
 	  (list->string (map1 integer->char (reverse l)))
 	  (loop (cons b l) (get-u8 p))))))
 
-;; int -> bytevector
+;; port -> int -> bytevector
 (define read-bstr
   (lambda (p n)
     (get-bytevector-n p n)))
 
+;; port -> int
 (define read-i16
   (lambda (p)
     (decode-i16 (read-bstr p 2))))
 
+;; port -> int
 (define read-u16
   (lambda (p)
     (decode-u16 (read-bstr p 2))))
 
+;; port -> int
 (define read-i32
   (lambda (p)
     (decode-i32 (read-bstr p 4))))
 
+;; port -> int
 (define read-u32
   (lambda (p)
     (decode-u32 (read-bstr p 4))))
 
+;; port -> int
 (define read-i64
   (lambda (p)
     (decode-i64 (read-bstr p 8))))
 
+;; port -> int
 (define read-u64
   (lambda (p)
     (decode-u64 (read-bstr p 8))))
 
+;; port -> double
 (define read-f32
   (lambda (p)
     (decode-f32 (read-bstr p 4))))
 
+;; port -> double
 (define read-f64
   (lambda (p)
     (decode-f64 (read-bstr p 8))))
@@ -290,9 +268,9 @@
 	  #f)
       b)))
 
-;; Evaluates to the object, described by the OSC type character
-;; `type', encoded at the OSC byte stream `p'.
+;; datum = int | double | string | bytevector
 
+;; port -> char -> datum
 (define read-value
   (lambda (p t)
     (cond
@@ -305,10 +283,7 @@
      ((equal? t oByt) (read-obyt p))
      (else (error "read-value" "bad type" t)))))
 
-;; Evaluate to the list of objects encoded at the OSC byte stream
-;; `p', conforming to the types given in the OSC character type
-;; list `types'.
-
+;; port -> [char] -> [datum]
 (define read-arguments
   (lambda (p types)
     (if (null? types)
@@ -316,10 +291,7 @@
 	(cons (read-value p (car types))
 	      (read-arguments p (cdr types))))))
 
-;; Evaluate to the scheme representation of the OSC message at the OSC
-;; byte stream `p'. The first object is the 'address' of the
-;; message, any subsequent objects are arguments for that address.
-
+;; port -> (string:[datum])
 (define read-message
   (lambda (p)
     (let* ((address (read-ostr p))
@@ -327,19 +299,16 @@
       (cons address
 	    (read-arguments p (cdr (string->list types)))))))
 
-;; Evaluate to a scheme representation of the OSC bundle encoded at
-;; the OSC stream `p'. The bundle ends at the end of the byte
-;; stream. The first object is the <real> UTC 'timetag' of the
-;; bundle, any subsequent objects are either OSC messages or embedded
-;; OSC bundles.
-
+;; port -> (utc:[message])
 (define read-bundle
   (lambda (p)
     (let ((bundletag (read-ostr p))
 	  (timetag (ntp->utc (read-u64 p)))
 	  (parts (list)))
       (if (not (equal? bundletag "#bundle"))
-	  (error "read-bundle" "illegal bundle tag" bundletag)
+	  (error "read-bundle" 
+		 "illegal bundle tag" 
+		 bundletag)
 	  (cons timetag
 		(let loop ((parts (list)))
 		  (if (eof-object? (lookahead-u8 p))
@@ -353,7 +322,7 @@
 (define hash-u8
   (char->integer #\#))
 
-;; () -> osc
+;; port -> osc
 (define read-packet
   (lambda (p)
     (if (equal? (lookahead-u8 p) hash-u8)
@@ -406,7 +375,7 @@
 		(list)
 		(padding-of (- 4 n*)))))))
 
-;; any -> bytevector|[bytevector]
+;; datum -> bytevector
 (define encode-value
   (lambda (e)
     (cond ((number? e) (if (integer? e)
@@ -416,7 +385,7 @@
 	  ((bytevector? e) (encode-bytes e))
 	  (else (error "encode-value" "illegal value" e)))))
 
-;; [any] -> [bytevector]
+;; [datum] -> bytevector
 (define encode-types
   (lambda (l)
     (encode-string
@@ -462,7 +431,7 @@
 	 (encode-bundle p)
 	 (encode-message p)))))
 
-;; any|[any] -> number|string|bytevector|[number|string|bytevector]
+;; any | [any] -> datum | [datum]
 (define purify
   (lambda (e)
     (cond ((or3 (number? e) (string? e) (bytevector? e)) e)

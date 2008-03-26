@@ -1,7 +1,7 @@
 (module sosc rhs/plt/empty
 (provide (all-defined-out)
 	 (all-from-out "ip.ss"))
-(require rhs/r6rs/rhs)
+(require rhs/plt/rhs)
 (require rnrs/base-6
 	 rnrs/bytevectors-6
 	 rnrs/records/syntactic-6

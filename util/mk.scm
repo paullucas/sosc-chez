@@ -2,7 +2,8 @@
 (load "/home/rohan/sw/rhs/util/util.scm")
 
 (mk-r6rs '(sosc r6rs sosc)
-	 '("/home/rohan/sw/sosc/src/sosc.scm")
+	 '("/home/rohan/sw/sosc/src/bytevector.scm"
+	   "/home/rohan/sw/sosc/src/sosc.scm")
 	 "/home/rohan/sw/sosc/r6rs/sosc.sls"
 	 '((rnrs base)
 	   (rnrs bytevectors)
