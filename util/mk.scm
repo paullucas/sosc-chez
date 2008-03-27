@@ -5,11 +5,8 @@
 	 '("/home/rohan/sw/sosc/src/bytevector.scm"
 	   "/home/rohan/sw/sosc/src/sosc.scm")
 	 "/home/rohan/sw/sosc/r6rs/sosc.sls"
-	 '((rnrs base)
-	   (rnrs bytevectors)
-	   (rnrs io ports)
-	   (rnrs io simple)
-	   (rhs r6rs rhs))
+	 '((rnrs)
+           (rhs r6rs rhs))
 	 '()
 	 '())
 
@@ -17,11 +14,7 @@
 	 '("/home/rohan/sw/sosc/ikarus/ip.scm"
 	   "/home/rohan/sw/sosc/src/transport.scm")
 	 "/home/rohan/sw/sosc/r6rs/transport.ikarus.sls"
-	 '((rnrs base)
-	   (rnrs records syntactic)
-	   (rnrs bytevectors)
-	   (rnrs io ports)
-	   (rnrs io simple)
+	 '((rnrs)
 	   (rhs r6rs rhs)
 	   (sosc r6rs sosc)
 	   (prefix (only (ikarus) 
