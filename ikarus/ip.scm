@@ -7,20 +7,20 @@
 ;; string -> int -> socket
 (define udp:open 
   (lambda (h p)
-    (let ((fd (udp-open)))
-      (udp-connect fd h p)
+    (let ((fd (ikarus:udp-open)))
+      (ikarus:udp-connect fd h p)
       (make-udp* fd h p))))
 
 ;; socket -> bytevector -> ()
 (define udp:send 
   (lambda (u b)
-    (udp-send (udp*-fd u) b)))
+    (ikarus:udp-send (udp*-fd u) b)))
 
 ;; socket -> maybe bytevector
 (define udp:recv
   (lambda (u)
     (let* ((b (make-bytevector 8388608))
-	   (n (udp-recv (udp*-fd u) b))
+	   (n (ikarus:udp-recv (udp*-fd u) b))
 	   (r (make-bytevector n)))
       (bytevector-copy! b 0 r 0 n)
       r)))
@@ -28,7 +28,7 @@
 ;; socket -> ()
 (define udp:close 
   (lambda (u)
-    (udp-close (udp*-fd u))))
+    (ikarus:udp-close (udp*-fd u))))
 
 (define-record-type tcp* (fields i o h p))
 
@@ -40,7 +40,7 @@
 (define tcp:open 
   (lambda (h p)
     (let-values
-     (((o i) (tcp-connect h (number->string p))))
+     (((o i) (ikarus:tcp-connect h (number->string p))))
      ;;(output-port-buffer-mode (buffer-mode none))
      (make-tcp* i o h p))))
 

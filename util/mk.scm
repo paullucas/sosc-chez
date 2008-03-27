@@ -24,9 +24,9 @@
 	   (rnrs io simple)
 	   (rhs r6rs rhs)
 	   (sosc r6rs sosc)
-	   (only (ikarus) 
-		 parameterize 
-		 tcp-connect
-		 udp-open udp-connect udp-send udp-recv udp-close))
+	   (prefix (only (ikarus) 
+                         tcp-connect
+                         udp-open udp-connect udp-send udp-recv udp-close)
+                   ikarus:))
 	 '()
 	 '())
