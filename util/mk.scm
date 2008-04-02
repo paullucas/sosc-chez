@@ -1,5 +1,5 @@
-(import (rhs r6rs rhs))
-(load "/home/rohan/sw/rhs/util/util.scm")
+(import (rnrs)
+        (rhs util util))
 
 (mk-r6rs '(sosc r6rs sosc)
 	 '("/home/rohan/sw/sosc/src/bytevector.scm"
@@ -20,3 +20,5 @@
 	   (prefix (ikarus) ikarus:))
 	 '()
 	 '())
+
+(exit)
