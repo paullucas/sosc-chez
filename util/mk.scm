@@ -17,9 +17,6 @@
 	 '((rnrs)
 	   (rhs r6rs rhs)
 	   (sosc r6rs sosc)
-	   (prefix (only (ikarus) 
-                         tcp-connect
-                         udp-open udp-connect udp-send udp-recv udp-close)
-                   ikarus:))
+	   (prefix (ikarus) ikarus:))
 	 '()
 	 '())
