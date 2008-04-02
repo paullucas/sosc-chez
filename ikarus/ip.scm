@@ -1,4 +1,4 @@
-(define-record-type udp* (fields fd h p))
+(define-record-type udp* (fields i o h p))
 
 ;; any -> bool
 (define udp:socket?
@@ -7,62 +7,29 @@
 ;; string -> int -> socket
 (define udp:open
   (lambda (h p)
-    (let ((fd (ikarus:udp-open)))
-      (ikarus:udp-connect fd h p)
-      (make-udp* fd h p))))
+    (let-values
+     (((o i) (ikarus:udp-connect h (number->string p))))
+     ;;(output-port-buffer-mode (buffer-mode none))
+     (make-udp* i o h p))))
 
 ;; socket -> bytevector -> ()
 (define udp:send
-  (lambda (u b)
-    (ikarus:udp-send (udp*-fd u) b)))
+  (lambda (t b)
+    (let ((o (udp*-o t)))
+      (put-bytevector o b)
+      (flush-output-port o))))
 
-;; socket -> maybe bytevector
+;; socket -> int -> maybe bytevector
 (define udp:recv
   (lambda (u)
-    (let* ((b (make-bytevector 8388608))
-           (n (ikarus:udp-recv (udp*-fd u) b))
-           (r (make-bytevector n)))
-      (bytevector-copy! b 0 r 0 n)
-      r)))
+    (get-bytevector-some (udp*-i u))))
 
 ;; socket -> ()
 (define udp:close
-  (lambda (u)
-    (ikarus:udp-close (udp*-fd u))))
+  (lambda (t)
+    (close-port (udp*-i t))
+    (close-port (udp*-o t))))
 
-(define-record-type tcp* (fields fd h p))
-
-;; any -> bool
-(define tcp:socket?
-  tcp*?)
-
-;; string -> int -> socket
-(define tcp:open
-  (lambda (h p)
-    (let ((fd (ikarus:tcp-open)))
-      (ikarus:tcp-connect fd h p)
-      (make-tcp* fd h p))))
-
-;; socket -> bytevector -> ()
-(define tcp:send
-  (lambda (u b)
-    (ikarus:tcp-send (tcp*-fd u) b)))
-
-;; socket -> int -> maybe bytevector
-(define tcp:read
-  (lambda (u n)
-    (let* ((b (make-bytevector n))
-           (n (ikarus:tcp-recv (tcp*-fd u) b))
-           (r (make-bytevector n)))
-      (bytevector-copy! b 0 r 0 n)
-      r)))
-
-;; socket -> ()
-(define tcp:close
-  (lambda (u)
-    (ikarus:tcp-close (tcp*-fd u))))
-
-#|
 (define-record-type tcp* (fields i o h p))
 
 ;; any -> bool
@@ -94,4 +61,3 @@
   (lambda (t)
     (close-port (tcp*-i t))
     (close-port (tcp*-o t))))
-|#
