@@ -1,13 +1,4 @@
-(module ip scheme/base
-(provide (all-defined-out))
-
-(require scheme/udp)
-(require scheme/tcp)
-(require (except-in rnrs/io/ports-6
-		    current-output-port
-		    current-input-port
-		    current-error-port))
-
+;; data udp
 (define-struct udp* (s h p))
 
 ;; any -> bool
@@ -44,6 +35,7 @@
   (lambda (u)
     (udp-close (udp*-s u))))
 
+;; data tcp
 (define-struct tcp* (i o h p))
 
 ;; any -> bool
@@ -75,5 +67,3 @@
   (lambda (fd)
     (close-input-port (tcp*-i fd))
     (close-output-port (tcp*-o fd))))
-
-)
