@@ -8,7 +8,7 @@
 (define udp:open
   (lambda (h p)
     (let-values
-     (((o i) (ikarus:udp-connect h (number->string p))))
+     (((i o) (ikarus:udp-connect h (number->string p))))
      ;;(output-port-buffer-mode (buffer-mode none))
      (make-udp* i o h p))))
 
@@ -40,7 +40,7 @@
 (define tcp:open
   (lambda (h p)
     (let-values
-     (((o i) (ikarus:tcp-connect h (number->string p))))
+     (((i o) (ikarus:tcp-connect h (number->string p))))
      ;;(output-port-buffer-mode (buffer-mode none))
      (make-tcp* i o h p))))
 
