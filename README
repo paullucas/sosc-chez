@@ -1,4 +1,7 @@
 sosc - scheme open sound control
 
+network communication is implemented for ikarus scheme only.
+tested with ikarus 0.0.4-rc1+ (revision 1747).
+
 (c) rohan drape, 1998-2009
     gpl.2, http://www.gnu.org/copyleft
