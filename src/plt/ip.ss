@@ -1,5 +1,5 @@
 ;; data udp
-(define-struct udp* (s h p))
+(plt:define-struct udp* (s h p))
 
 ;; any -> bool
 (define udp:socket?
@@ -8,7 +8,7 @@
 ;; string -> int -> socket
 (define udp:open 
   (lambda (h p)
-    (make-udp* (udp-open-socket) h p)))
+    (make-udp* (plt:udp-open-socket h p) h p)))
 
 ;; socket -> bytevector -> ()
 (define udp:send 
@@ -16,7 +16,7 @@
     (let ((s (udp*-s u))
 	  (h (udp*-h u))
 	  (p (udp*-p u)))
-      (udp-send-to* s h p b))))
+      (plt:udp-send-to* s h p b))))
 
 ;; socket -> maybe bytevector
 (define udp:recv
@@ -24,19 +24,19 @@
     (let* ((s (udp*-s u))
 	   (h (udp*-h u))
 	   (p (udp*-p u))
-	   (b (make-bytes 8192))
-	   (r (sync/timeout 1.0 (udp-receive!-evt s b))))
+	   (b (plt:make-bytes 8192))
+	   (r (plt:sync/timeout 1.0 (plt:udp-receive!-evt s b))))
       (if r
-	  (subbytes b 0 (car r))
+	  (plt:subbytes b 0 (plt:car r))
 	  #f))))
 
 ;; socket -> ()
 (define udp:close 
   (lambda (u)
-    (udp-close (udp*-s u))))
+    (plt:udp-close (udp*-s u))))
 
 ;; data tcp
-(define-struct tcp* (i o h p))
+(plt:define-struct tcp* (i o h p))
 
 ;; any -> bool
 (define tcp:socket?
@@ -46,9 +46,9 @@
 (define tcp:open 
   (lambda (h p)
     (let-values
-     (((i o) (tcp-connect h p)))
-     (file-stream-buffer-mode i 'none)
-     (file-stream-buffer-mode o 'none)
+     (((i o) (plt:tcp-connect h p)))
+     (plt:file-stream-buffer-mode i 'none)
+     (plt:file-stream-buffer-mode o 'none)
      (make-tcp* i o h p))))
 
 ;; socket -> bytevector -> ()
