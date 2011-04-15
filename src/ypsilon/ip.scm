@@ -5,9 +5,9 @@
 ;; string -> int -> socket
 (define udp:open
   (lambda (h p)
-    (ypsilon:make-socket 
-     h 
-     (number->string p) 
+    (ypsilon:make-socket
+     h
+     (number->string p)
      ypsilon:AF_INET
      ypsilon:SOCK_DGRAM
      (+ ypsilon:AI_V4MAPPED ypsilon:AI_ADDRCONFIG)

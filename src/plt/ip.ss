@@ -6,12 +6,12 @@
   udp*?)
 
 ;; string -> int -> socket
-(define udp:open 
+(define udp:open
   (lambda (h p)
     (make-udp* (plt:udp-open-socket h p) h p)))
 
 ;; socket -> bytevector -> ()
-(define udp:send 
+(define udp:send
   (lambda (u b)
     (let ((s (udp*-s u))
 	  (h (udp*-h u))
@@ -31,7 +31,7 @@
 	  #f))))
 
 ;; socket -> ()
-(define udp:close 
+(define udp:close
   (lambda (u)
     (plt:udp-close (udp*-s u))))
 
@@ -43,7 +43,7 @@
   tcp*?)
 
 ;; string -> int -> socket
-(define tcp:open 
+(define tcp:open
   (lambda (h p)
     (let-values
      (((i o) (plt:tcp-connect h p)))
@@ -56,7 +56,7 @@
   (lambda (fd b)
     (let ((o (tcp*-o fd)))
       (put-bytevector o b))))
-  
+
 ;; socket -> int -> maybe bytevector
 (define tcp:read
   (lambda (fd n)

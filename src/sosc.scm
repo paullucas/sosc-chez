@@ -306,8 +306,8 @@
 	  (timetag (ntp->utc (read-u64 p)))
 	  (parts (list)))
       (if (not (equal? bundletag "#bundle"))
-	  (error "read-bundle" 
-		 "illegal bundle tag" 
+	  (error "read-bundle"
+		 "illegal bundle tag"
 		 bundletag)
 	  (cons timetag
 		(let loop ((parts (list)))
