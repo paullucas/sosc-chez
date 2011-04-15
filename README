@@ -1,9 +1,9 @@
 sosc - scheme open sound control
 
 network communication is implemented for ikarus & plt schemes only.
-tested with ikarus 0.0.4-rc1+ (revision 1747).
+tested with ikarus 0.0.4-rc1+ (revision 1870)
 
-(c) rohan drape, 1998-2009
-    gpl.2, http://www.gnu.org/copyleft
+(c) rohan drape, 1998-2011
+    gpl, http://www.gnu.org/copyleft
     with contributions by henk@henk.ca (plt support)
     see darcs history for details
