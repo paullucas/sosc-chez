@@ -279,8 +279,9 @@
      ((equal? t oU64) (read-u64 p))
      ((equal? t oF32) (read-f32 p))
      ((equal? t oF64) (read-f64 p))
-     ((equal? t oStr) (read-ostr p))
-     ((equal? t oByt) (read-obyt p))
+     ((equal? t oSTR) (read-ostr p))
+     ((equal? t oBYT) (read-obyt p))
+     ((equal? t oMID) (read-u32 p))
      (else (error "read-value" "bad type" t)))))
 
 ;; port -> [char] -> [datum]
@@ -446,8 +447,9 @@
 (define oU64 #\t)
 (define oF32 #\f)
 (define oF64 #\d)
-(define oStr #\s)
-(define oByt #\b)
+(define oSTR #\s)
+(define oBYT #\b)
+(define oMID #\m)
 
 ;; string -> [any] -> osc
 (define message
