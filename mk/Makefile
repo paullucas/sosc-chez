@@ -1,4 +1,4 @@
-R6RS=$(HOME)/lib/r6rs
+R6RS=$(HOME)/opt/lib/r6rs
 
 all:
 	make clean
