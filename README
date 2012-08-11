@@ -1,9 +1,25 @@
-sosc - scheme open sound control
+sosc
+----
 
-network communication is implemented for ikarus & plt schemes only.
-tested with ikarus 0.0.4-rc1+ (revision 1870)
+[r6rs][r6rs] scheme [open sound control][osc]
 
-(c) rohan drape, 1998-2012
-    gpl, http://www.gnu.org/copyleft
-    with contributions by henk@henk.ca (plt support)
-    see darcs history for details
+network communication is implemented for [ikarus][ikarus] & [plt][plt]
+schemes only.
+
+tested with ikarus 0.0.4-rc1+ (revision 1870) and racket v5.1.3.
+
+[r6rs]: http://r6rs.org/
+[osc]: http://opensoundcontrol.org/
+[ikarus]: https://launchpad.net/ikarus/
+[plt]: http://plt-scheme.org/
+
+© [rohan drape][rd] and others, 1998-2012, [gpl][gpl].
+with contributions by:
+
+- henk@henk.ca (plt support)
+
+see [darcs][darcs] history for details
+
+[rd]:  http://rd.slavepianos.org/
+[gpl]: http://gnu.org/copyleft/
+[darcs]: http://darcs.net/
