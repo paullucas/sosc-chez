@@ -241,7 +241,7 @@
   (lambda (n)
     (+ n seconds-from-1900-to-1970)))
 
-;; int -> doubl
+;; int -> double
 (define ntp->utc
   (lambda (n)
     (- (/ n (expt 2 32)) seconds-from-1900-to-1970)))
