@@ -159,7 +159,7 @@
 	   (n (encode-u8 (bytevector-length b))))
       (list n b))))
 
-;; string -> bytevector
+;; string -> [bytevector]
 (define encode-cstr
   (lambda (s)
     (let* ((b (encode-str s))
@@ -347,34 +347,33 @@
      l
      (enum-from-to 0 (- (length l) 1)))))
 
-;; int -> [bytevector]
-(define padding-of
-  (lambda (n) (replicate n (encode-u8 0))))
-
 ;; string -> int
 (define cstring-length
   (lambda (s)
     (+ 1 (string-length s))))
 
+;; int -> int
+;; (equal? (map osc-align (enum-from-to 0 7)) (list 0 3 2 1 0 3 2 1))
+(define osc-align
+  (lambda (n)
+    (- (fxand (+ n 3) (fxnot 3)) n)))
+
+;; int -> [bytevector]
+(define padding-of
+  (lambda (n) (replicate (osc-align n) (encode-u8 0))))
+
 ;; string -> [bytevector]
 (define encode-string
   (lambda (s)
-    (let ((n (mod (cstring-length s) 4)))
-      (list (encode-cstr s)
-	    (if (= n 0)
-		(list)
-		(padding-of (- 4 n)))))))
+    (list (encode-cstr s) (padding-of (cstring-length s)))))
 
 ;; bytevector -> [bytevector]
 (define encode-bytes
   (lambda (b)
-    (let* ((n (bytevector-length b))
-	   (n* (mod n 4)))
+    (let ((n (bytevector-length b)))
       (list (encode-i32 n)
 	    b
-	    (if (= n* 0)
-		(list)
-		(padding-of (- 4 n*)))))))
+            (padding-of n)))))
 
 ;; datum -> bytevector
 (define encode-value
