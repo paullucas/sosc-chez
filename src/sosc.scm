@@ -166,6 +166,11 @@
 	   (z (encode-u8 0)))
       (list b z))))
 
+;; port -> int -> bytevector
+(define read-bstr
+  (lambda (p n)
+    (get-bytevector-n p n)))
+
 ;; port -> string
 (define read-pstr
   (lambda (p)
@@ -182,10 +187,15 @@
 	  (list->string (map1 integer->char (reverse l)))
 	  (loop (cons b l) (get-u8 p))))))
 
-;; port -> int -> bytevector
-(define read-bstr
-  (lambda (p n)
-    (get-bytevector-n p n)))
+;; port -> int
+(define read-i8
+  (lambda (p)
+    (decode-i8 (read-bstr p 1))))
+
+;; port -> int
+(define read-u8
+  (lambda (p)
+    (decode-u8 (read-bstr p 1))))
 
 ;; port -> int
 (define read-i16
