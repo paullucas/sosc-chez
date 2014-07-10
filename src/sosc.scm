@@ -54,6 +54,8 @@
     (utf8->string b)))
 
 ;; bytevector -> string
+;;
+;; (decode-pstr (flatten-bytevectors (encode-pstr "string")))
 (define decode-pstr
   (lambda (v)
     (let* ((n (decode-u8 v))
