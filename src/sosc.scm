@@ -186,7 +186,7 @@
     (let loop ((l nil)
 	       (b (get-u8 p)))
       (if (= b 0)
-	  (list->string (map1 integer->char (reverse l)))
+	  (list->string (map integer->char (reverse l)))
 	  (loop (cons b l) (get-u8 p))))))
 
 ;; port -> int
@@ -403,7 +403,7 @@
     (encode-string
      (list->string
       (cons #\,
-	    (map1 (lambda (e)
+	    (map (lambda (e)
 		    (cond ((number? e) (if (integer? e)
 					   #\i
 					   #\f))
@@ -417,14 +417,14 @@
   (lambda (m)
     (list (encode-string (car m))
 	  (encode-types (cdr m))
-	  (map1 encode-value (cdr m)))))
+	  (map encode-value (cdr m)))))
 
 ;; osc -> [bytevector]
 (define encode-bundle-ntp
   (lambda (b)
     (list (encode-string "#bundle")
 	  (encode-u64 (ntpr->ntp (car b)))
-	  (map1 (lambda (e)
+	  (map (lambda (e)
 		  (if (message? e)
 		      (encode-bytes (encode-osc e))
 		      (error "encode-bundle" "illegal value" e)))
@@ -447,7 +447,7 @@
 (define purify
   (lambda (e)
     (cond ((or3 (number? e) (string? e) (bytevector? e)) e)
-	  ((list? e) (map1 purify e))
+	  ((list? e) (map purify e))
 	  ((symbol? e) (symbol->string e))
 	  ((boolean? e) (if e 1 0))
 	  (else (error "purify" "illegal input" e)))))

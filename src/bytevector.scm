@@ -27,7 +27,7 @@
 (define flatten-bytevectors
   (lambda (t)
     (let* ((l (flatten t))
-	   (n (map1 bytevector-length l))
+	   (n (map bytevector-length l))
 	   (m (sum n))
 	   (v (make-bytevector m)))
       (let loop ((i 0)
