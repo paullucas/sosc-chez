@@ -404,11 +404,9 @@
      (list->string
       (cons #\,
 	    (map (lambda (e)
-		    (cond ((number? e) (if (integer? e)
-					   #\i
-					   #\f))
-			  ((string? e) #\s)
-			  ((bytevector? e) #\b)
+		    (cond ((number? e) (if (integer? e) oI32 oF32))
+			  ((string? e) oSTR)
+			  ((bytevector? e) oBYT)
 			  (else (error "encode-types" "type?" e))))
 		 l))))))
 

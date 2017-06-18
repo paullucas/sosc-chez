@@ -13,7 +13,7 @@ tested with ikarus 0.0.4-rc1+ (revision 1870) and racket v5.1.3.
 [ikarus]: https://launchpad.net/ikarus/
 [plt]: http://plt-scheme.org/
 
-© [rohan drape][rd] and others, 1998-2014, [gpl][gpl].
+© [rohan drape][rd] and others, 1998-2017, [gpl][gpl].
 with contributions by:
 
 - henk@henk.ca (plt support)
