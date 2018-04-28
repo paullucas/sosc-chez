@@ -1,0 +1,12 @@
+#!r6rs
+(import (akku format lockfile))
+(projects
+ ((name "libc")
+  (location (git "git@github.com:theschemer/libc.git"))
+  (revision "e8f991ebcb4feba501ffe9cf1e0c27be6feab413"))
+ ((name "socket")
+  (location (git "git@github.com:theschemer/socket.git"))
+  (revision  "1756d833ff9d767118c4b9c99d3282be0206ffe2"))
+ ((name "rhs")
+  (location (git "git@github.com:paullucas/rhs-chez.git"))
+  (revision "cac2a012f1acd3bca2dbe307ea063dfd0ed369a9")))

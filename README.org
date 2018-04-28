@@ -1,0 +1,25 @@
+* sosc-chez
+  Chez Scheme fork of Rohan Drape's [[http://rd.slavepianos.org/?t=sosc][sosc]] library
+** Quick Start
+#+BEGIN_SRC bash
+# Install dependencies
+akku install
+# Prepare environment
+source .akku/bin/activate
+# Launch REPL
+scheme
+#+END_SRC
+** Requirements
+*** Chez Scheme
+**** [[https://aur.archlinux.org/packages/chez-scheme/][AUR]]
+**** [[https://github.com/cisco/ChezScheme/blob/master/BUILDING][Source]]
+*** Akku Package Manager
+#+BEGIN_SRC bash
+# Download
+curl -L https://github.com/weinholt/akku/releases/download/v0.2.2/akku-0.2.2.src.tar.xz -o akku-0.2.2.src.tar.xz
+# Extract
+tar xvf akku-0.2.2.src.tar.xz
+# Install
+cd akku-0.2.2+src
+./install.sh
+#+END_SRC
